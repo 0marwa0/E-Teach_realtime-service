@@ -1,37 +1,36 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-
-const app = express();
-app.use(bodyParser.json());
-
 app.post("/sns-listener", async (req, res) => {
   const type = req.headers["x-amz-sns-message-type"];
 
   if (type === "SubscriptionConfirmation") {
+    // Confirm SNS Subscription
     const subscribeURL = req.body.SubscribeURL;
-    console.log(`Confirming subscription at: ${subscribeURL}`);
-
-    // You can auto-confirm or manually visit the URL
+    console.log(`Confirm this URL: ${subscribeURL}`);
     return res.sendStatus(200);
   }
 
   if (type === "Notification") {
     const message = JSON.parse(req.body.Message);
-    console.log("SNS Event Received:", message);
+    const { meetingId, eventType } = message;
 
-    // Example: Push to WebSocket, log, etc.
-    if (message.eventType === "meeting.started") {
-      console.log(`Meeting started: ${message.meetingId}`);
-      // TODO: Notify frontend via WebSocket or trigger something
+    console.log(`Zoom event: ${eventType} for meeting: ${meetingId}`);
+
+    // Example actions per event type:
+    switch (eventType) {
+      case "meeting.started":
+        // TODO: push real-time update
+        break;
+      case "meeting.ended":
+        // TODO: update DB or notify user
+        break;
+      case "recording.ready":
+        // TODO: send email or notify frontend
+        break;
+      default:
+        console.log("Unhandled event type");
     }
 
     return res.sendStatus(200);
   }
 
   return res.sendStatus(400);
-});
-
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Realtime service running on port ${PORT}`);
 });
