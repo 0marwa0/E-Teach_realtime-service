@@ -37,6 +37,10 @@ app.post("/sns-listener", async (req, res) => {
   }
 
   if (type === "Notification") {
+    const subscribeURL = req?.body?.SubscribeURL;
+
+    console.log(`Confirm this URL: ${subscribeURL}`);
+
     const message = JSON.parse(req.body.Message);
     const { meetingId, eventType } = message;
     io.emit("zoom-event", {
