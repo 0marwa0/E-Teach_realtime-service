@@ -12,7 +12,8 @@ const io = new Server(server, {
 });
 
 app.use(bodyParser.json());
-const PORT = 5001;
+const PORT = process.env.PORT || 5001;
+
 app.listen(PORT, () =>
   console.log(`Real time service running on port ${PORT}`)
 );
