@@ -30,45 +30,48 @@ app.get("/", (req, res) => {
 });
 app.post("/sns-listener", async (req, res) => {
   const type = req.headers["x-amz-sns-message-type"];
+  console.log("Type:", type);
+  console.log("Raw body:", req.body);
+
+  let body;
+
+  // Try to parse the body (handle both string and already-parsed objects)
+  try {
+    body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+  } catch (e) {
+    console.error("Could not parse body:", e.message);
+    return res.status(400).send("Invalid body");
+  }
+
+  // Just log what we got
+  console.log("Parsed body:", body);
 
   if (type === "SubscriptionConfirmation") {
-    // Confirm SNS Subscription
-    const subscribeURL = req?.body?.SubscribeURL;
-    console.log(`Confirm this URL: ${subscribeURL}`);
+    const subscribeURL = body?.SubscribeURL;
+    console.log("SubscribeURL:", subscribeURL);
+
+    if (!subscribeURL) {
+      return res.status(400).send("Missing SubscribeURL");
+    }
+
+    // Optional: auto-confirm subscription
+    // await axios.get(subscribeURL);
+
     return res.sendStatus(200);
   }
 
   if (type === "Notification") {
-    const subscribeURL = req?.body?.SubscribeURL;
-
-    console.log(`Confirm this URL: ${subscribeURL}`);
-
-    const message = JSON.parse(req.body.Message);
+    const message = JSON.parse(body?.Message);
     const { meetingId, eventType } = message;
+
     io.emit("zoom-event", {
       type: eventType,
       meetingId,
     });
 
     console.log(`Zoom event: ${eventType} for meeting: ${meetingId}`);
-
-    // Example actions per event type:
-    switch (eventType) {
-      case "meeting.started":
-        // TODO: push real-time update
-        break;
-      case "meeting.ended":
-        // TODO: update DB or notify user
-        break;
-      case "recording.ready":
-        // TODO: send email or notify frontend
-        break;
-      default:
-        console.log("Unhandled event type");
-    }
-
     return res.sendStatus(200);
   }
 
-  return res.sendStatus(400);
+  return res.status(400).send("Unknown type");
 });
