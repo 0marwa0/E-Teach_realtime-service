@@ -1,8 +1,24 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 
+const { Server } = require("socket.io");
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
 const app = express();
 app.use(bodyParser.json());
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
 app.post("/sns-listener", async (req, res) => {
   const type = req.headers["x-amz-sns-message-type"];
 
@@ -16,6 +32,10 @@ app.post("/sns-listener", async (req, res) => {
   if (type === "Notification") {
     const message = JSON.parse(req.body.Message);
     const { meetingId, eventType } = message;
+    io.emit("zoom-event", {
+      type: eventType,
+      meetingId,
+    });
 
     console.log(`Zoom event: ${eventType} for meeting: ${meetingId}`);
 
