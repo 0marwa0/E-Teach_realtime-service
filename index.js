@@ -31,7 +31,7 @@ app.post("/sns-listener", async (req, res) => {
 
   if (type === "SubscriptionConfirmation") {
     // Confirm SNS Subscription
-    const subscribeURL = req.body.SubscribeURL;
+    const subscribeURL = req?.body?.SubscribeURL;
     console.log(`Confirm this URL: ${subscribeURL}`);
     return res.sendStatus(200);
   }
