@@ -11,7 +11,9 @@ const io = new Server(server, {
   },
 });
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ type: ["application/json"] }));
+app.use(bodyParser.text({ type: "text/plain" }));
+
 const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () =>
