@@ -18,6 +18,9 @@ io.on("connection", (socket) => {
     console.log("User disconnected:", socket.id);
   });
 });
+app.get("/", (req, res) => {
+  res.send("real time service!!");
+});
 app.post("/sns-listener", async (req, res) => {
   const type = req.headers["x-amz-sns-message-type"];
 
