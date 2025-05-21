@@ -12,6 +12,10 @@ const io = new Server(server, {
 });
 
 app.use(bodyParser.json());
+const PORT = 5001;
+app.listen(PORT, () =>
+  console.log(`Real time service running on port ${PORT}`)
+);
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
   socket.on("disconnect", () => {
